@@ -30,7 +30,7 @@ type Config struct {
 type Metric struct {
 	Name  string
 	Type  string
-	Value float32
+	Value float32 `json:",string"`
 	Host  string
 	Tags  []string
 }
