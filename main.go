@@ -8,6 +8,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -30,7 +31,7 @@ type Config struct {
 type Metric struct {
 	Name  string
 	Type  string
-	Value float32 `json:",string"`
+	Value string
 	Host  string
 	Tags  []string
 }
@@ -52,9 +53,11 @@ type Events []Event
 
 // MarshalJSON provides custom serialization for the Metric object
 func (m Metric) MarshalJSON() ([]byte, error) {
+	v, _ := strconv.ParseFloat(m.Value, 32)
+
 	point := []float32{
 		float32(time.Now().Unix()),
-		m.Value,
+		float32(v),
 	}
 
 	return json.Marshal(&struct {
@@ -121,6 +124,10 @@ func parseMetrics() (Metrics, error) {
 		if !isValidMetricType(m.Type) {
 			log.Printf("invalid metric type: %s", m.Type)
 			continue
+		}
+
+		if m.Value == "" {
+			m.Value = os.Getenv("VALUE")
 		}
 
 		var newTags []string
